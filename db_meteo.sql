@@ -10,12 +10,20 @@ CREATE TABLE equipment_types(
     equipment_type_name VARCHAR(30),
     PRIMARY KEY (equipment_type_id)
 );
+COMMENT ON TABLE equipment_types IS 'типы оборудования(например ветровое ружье)';
+COMMENT ON COLUMN equipment_types.equipment_type_id IS 'уникальный айди оборудования';
+COMMENT ON COLUMN equipment_types.equipment_type_name IS 'название оборудование';
+
 --должности
 CREATE TABLE positions(
     position_id INT,
     position_name VARCHAR(30),
     PRIMARY KEY (position_id)
 );
+COMMENT ON TABLE positions IS 'должности пользователей';
+COMMENT ON COLUMN positions.position_id IS 'уникальный айди должности';
+COMMENT ON COLUMN positions.position_name IS 'название должности';
+
 --пачки. группирует пользователей и их замеры в пачки
 CREATE TABLE packs(
     pack_id INT,
@@ -23,6 +31,11 @@ CREATE TABLE packs(
     created_date TIMESTAMP,
     PRIMARY KEY (pack_id)
 );
+COMMENT ON TABLE packs IS 'пачки, чтобы группировать измерения';
+COMMENT ON COLUMN packs.pack_id IS 'уникальный айди пачки';
+COMMENT ON COLUMN packs.pack_number IS 'номер пачки';
+COMMENT ON COLUMN packs.created_date IS 'дата создания пачки';
+
 -- пользователи.
 CREATE TABLE users(
     user_id INT,
@@ -33,6 +46,12 @@ CREATE TABLE users(
     FOREIGN KEY(position_id) REFERENCES positions(position_id),
     FOREIGN KEY(pack_id) REFERENCES packs(pack_id)
 );
+COMMENT ON TABLE users IS 'пользователи системы';
+COMMENT ON COLUMN users.user_id IS 'уникальный айди пользователя';
+COMMENT ON COLUMN users.user_name IS 'фамилия и имя пользователя';
+COMMENT ON COLUMN users.position_id IS 'Ссылка на должность';
+COMMENT ON COLUMN users.pack_id IS 'Ссылка на пачку';
+
 --параметры
 CREATE TABLE parameters(
     parameter_id INT,
@@ -44,7 +63,12 @@ CREATE TABLE parameters(
     FOREIGN KEY(user_id) REFERENCES users(user_id),
     FOREIGN KEY(equipment_type_id) REFERENCES equipment_types(equipment_type_id)
 );
-
+COMMENT ON TABLE parameters IS 'параметры измерений';
+COMMENT ON COLUMN parameters.parameter_id IS 'уникальный айди параметра';
+COMMENT ON COLUMN parameters.parameter_name IS 'название параметра';
+COMMENT ON COLUMN parameters.parameter_value IS 'значение параметра';
+COMMENT ON COLUMN parameters.user_id IS 'ссылка на пользователя';
+COMMENT ON COLUMN parameters.equipment_type_id IS 'ссылка на тип оборудования';
 
 INSERT INTO equipment_types (equipment_type_id, equipment_type_name) VALUES (1, 'ДМК');
 INSERT INTO equipment_types (equipment_type_id, equipment_type_name) VALUES (2, 'ВР');
