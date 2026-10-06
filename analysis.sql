@@ -41,9 +41,9 @@ inner join (
     select user_id, cnt_records from (
         select 
             u.user_id, 
-            count(*) as cnt_records
-        from public.parameters p
-        inner join public.users u on u.user_id = p.user_id
+            count(p.parameter_id) as cnt_records
+        from public.users u
+        left join public.parameters p on p.user_id = u.user_id
         group by u.user_id
     ) as t1
     where cnt_records != 5
@@ -98,13 +98,15 @@ inner join(
 )as inner_t2 on t1.parameter_id = inner_t2.parameter_id;
 
 --запрос 5
-select * from public.type_params as t1
+select * from public.parameters as t1
 inner join (
-    select id from (
+    select parameter_id from (
         select
+            p.parameter_id,
             tp.id,
             um.name as unit_name
-        from public.type_params tp
+        from public.parameters p
+        inner join public.type_params tp on tp.id=p.type_param_id
         inner join public.unit_measure um on um.id = tp.unit_measure_id
         where
             (tp.id = 1 and um.name != 'м')
@@ -114,4 +116,4 @@ inner join (
             or (tp.id = 5 and um.name != 'м/с')
             or (tp.id = 6 and um.name != 'м')
     ) as t1
-) as inner_t2 on t1.id = inner_t2.id;
+) as inner_t2 on t1.parameter_id =  inner_t2.parameter_id;
