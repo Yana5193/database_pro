@@ -1,3 +1,5 @@
+do $$
+begin
 drop table if exists parameters cascade;
 drop table if exists users cascade;
 drop table if exists positions cascade;
@@ -14,8 +16,7 @@ drop sequence if exists seq_packs;
 drop sequence if exists seq_users;
 drop sequence if exists seq_parameters;
 drop sequence if exists seq_calc;
-
-begin;
+end$$;
 
 create sequence seq_equipment_types start with 1;
 create sequence seq_positions start with 1;
@@ -130,11 +131,7 @@ comment on column temperature_calculations.pack_id is 'ссылка на пач�
 comment on column temperature_calculations.avg_temperature is 'средняя температура по пачке';
 comment on column temperature_calculations.calculated_date is 'время проведения расчета';
 
-commit;
-
 --создаем связи
-begin;
-
 alter table users
 add constraint fk_users_position foreign key (position_id) references positions(position_id),
 add constraint fk_users_pack foreign key (pack_id) references packs(pack_id);
@@ -152,8 +149,6 @@ add constraint fk_parameters_type foreign key (type_param_id) references type_pa
 
 alter table temperature_calculations
 add constraint fk_calc_pack foreign key (pack_id) references packs(pack_id);
-
-commit;
 
 --заполненеи данными
 begin;
@@ -212,9 +207,13 @@ commit;
 
 --скрипт для отображения метаданных
 select 
-    row_number() over (order by table_name) as "№",
-    table_name as "Наименование",
-    table_type as "Тип"
-from information_schema.tables
-where table_schema not in ('information_schema', 'pg_catalog')
-order by table_name;
+    row_number() over (order by t.table_name) as "№",
+    t.table_name as "Наименование",
+    t.table_type as "Тип",
+    (
+        select count(*) 
+        from information_schema.columns c 
+        where c.table_name = t.table_name and c.table_schema = 'public'
+    ) as "Количество столбцов"
+from information_schema.tables t
+where t.table_schema = 'public' and t.table_catalog = current_database();
