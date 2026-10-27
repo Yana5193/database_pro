@@ -2,27 +2,25 @@
 create or replace function validate_params(p meteo_params)
 returns text as $$
 declare 
+	r record;
 	v_errors text[] := '{}';
 begin
-	if p.station_height< -1000 or p.station_height > 10000 then
-		v_errors:=array_append(v_errors,'ошибка,неверная высота метеопоста');
-	end if;
-	if p.temperature<-58 or p.temperature>58 then
-		v_errors:=array_append(v_errors,'ошибка,температура вне диапазона');
-	end if;
-	if p.pressure<500 or p.pressure>900 then
-		v_errors:=array_append(v_errors,'ошибка,давление вне диапазона');
-	end if;
-	if p.wind_direction<0 or p.wind_direction>59 then
-		v_errors:=array_append(v_errors,'ошибка,направление ветра должно быть от 0 до 59');
-	end if;
-	if p.wind_speed<0 or p.wind_speed>15 then
-		v_errors:=array_append(v_errors,'ошибка,скорость ветра вне диапазона');
-	end if;
-	if p. bullet_drift<0 or p.bullet_drift>150 then
-		v_errors:=array_append(v_errors,'ошибка,дальность сноса пуль вне диапазона');
-	end if;
-	if array_length(v_errors, 1) is null then
+	for r in select param_id, min_val, max_val, error_text from constants loop
+        if r.param_id = 1 and (p.station_height < r.min_val or p.station_height > r.max_val) then
+            v_errors := array_append(v_errors, r.error_text);
+        elsif r.param_id = 2 and (p.temperature < r.min_val or p.temperature > r.max_val) then
+            v_errors := array_append(v_errors, r.error_text);
+        elsif r.param_id = 3 and (p.pressure < r.min_val or p.pressure > r.max_val) then
+            v_errors := array_append(v_errors, r.error_text);
+        elsif r.param_id = 4 and (p.wind_direction < r.min_val or p.wind_direction > r.max_val) then
+            v_errors := array_append(v_errors, r.error_text);
+        elsif r.param_id = 5 and (p.wind_speed < r.min_val or p.wind_speed > r.max_val) then
+            v_errors := array_append(v_errors, r.error_text);
+        elsif r.param_id = 6 and (p.bullet_drift < r.min_val or p.bullet_drift > r.max_val) then
+            v_errors := array_append(v_errors, r.error_text);
+        end if;
+    end loop;
+    if array_length(v_errors, 1) is null then
         return 'Ошибок нет';
     else
         return array_to_string(v_errors, '; ');
