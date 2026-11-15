@@ -37,7 +37,8 @@ left join (
     group by id
 ) as t2
 on t1.id = t2.id;
-
+select min(dater) from receiving;
+select min(dater) from journal;
 --показывает перечень товаров из справочника и сопоставляет их с записями в складском журнале.
 select * from product t1
 left join (
@@ -46,7 +47,7 @@ left join (
 ) as t2
 on t1.productid = t2.ProductID;
 
--- Показывает наличие цен поставщиков для каждой товарной позиции.
+-- списко продуктов которые имеют цену
 select * from product t1
 left join (
     select productid from pricelist
@@ -61,8 +62,39 @@ right join (
     select SourceID from bm_Journal_Details
     group by SourceID
 ) as t2
-on t1.transnumber = t2.SourceID;
---какие товары попадают в чеки.
+on t1.transnumber = t2.SourceID
+
+-- записи журнала, не связанные с детализацией
+select * from journal t1
+left join (
+    select SourceID from bm_Journal_Details
+    group by SourceID
+) as t2
+on t1.transnumber = t2.SourceID
+where t2.SourceID is null;
+-- записи журнала, не связанные с детализацией по SourceID, но связанные по номеру чека
+select * from journal t1
+left join (
+    select SourceID from bm_Journal_Details
+    group by SourceID
+) as t2
+on t1.transnumber = t2.SourceID
+inner join (
+    select TicketNumber from bm_Journal_Details
+    group by TicketNumber
+) as t3
+on t1.receiptn = t3.TicketNumber
+where t2.SourceID is null;
+
+select * from journal t1
+left join (
+    select SourceID from bm_Journal_Details
+    group by SourceID
+) as t2
+on t1.transnumber = t2.SourceID
+where  t2.SourceID is null
+
+--какие товары  не попадают в чеки.
 select t1.* from product t1
 left join (
     select ProductID from bm_Journal_Details
